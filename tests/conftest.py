@@ -2,7 +2,15 @@ from typing import Any
 
 import pytest
 import sqlite3
+from fastapi.testclient import TestClient
 from app.database import get_connection
+from app.main import app
+
+
+@pytest.fixture
+def client():
+    """Fixture providing FastAPI test client for API testing"""
+    return TestClient(app)
 
 
 @pytest.fixture

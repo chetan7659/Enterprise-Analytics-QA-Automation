@@ -614,3 +614,269 @@ def test_sql_product_region_date_revenue(populated_db):
 
     assert result[0] == 50000
 
+
+
+def test_sql_revenue_by_region(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT region, SUM(sales)
+        FROM sales
+        GROUP BY region
+        ORDER BY region
+        """
+    ).fetchall()
+
+    assert result == [
+        ("India", 145000),
+        ("USA", 60000),
+    ]
+
+
+
+
+def test_sql_revenue_by_product(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT product, SUM(sales)
+        FROM sales
+        GROUP BY product
+        ORDER BY product
+        """
+    ).fetchall()
+
+    assert result == [
+        ("Keyboard", 10000),
+        ("Laptop", 90000),
+        ("Monitor", 40000),
+        ("Mouse", 15000),
+        ("Phone", 50000),
+    ]
+
+
+def test_sql_total_revenue(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT SUM(sales)
+        FROM sales
+        """
+    ).fetchone()
+
+    assert result[0] == 205000
+
+
+def test_sql_sales_count(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT COUNT(*)
+        FROM sales
+        """
+    ).fetchone()
+
+    assert result[0] == 7
+
+
+def test_sql_average_sales(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT AVG(sales)
+        FROM sales
+        """
+    ).fetchone()
+
+    expected = 205000 / 7
+
+    assert result[0] == pytest.approx(expected)
+
+
+def test_sql_min_sales(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT MIN(sales)
+        FROM sales
+        """
+    ).fetchone()
+
+    assert result[0] == 10000
+
+
+def test_sql_max_sales(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT MAX(sales)
+        FROM sales
+        """
+    ).fetchone()
+
+    assert result[0] == 50000
+
+
+def test_sql_sales_count_by_region(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT region, COUNT(*)
+        FROM sales
+        GROUP BY region
+        ORDER BY region
+        """
+    ).fetchall()
+
+    assert result == [
+        ("India", 5),
+        ("USA", 2),
+    ]
+
+
+def test_sql_average_sales_by_region(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT region, AVG(sales)
+        FROM sales
+        GROUP BY region
+        ORDER BY region
+        """
+    ).fetchall()
+
+    india_average = (10000 + 50000 + 30000 + 15000 + 40000) / 5
+    usa_average = (40000 + 20000) / 2
+
+    assert result[0][0] == "India"
+    assert result[0][1] == pytest.approx(india_average)
+    assert result[1][0] == "USA"
+    assert result[1][1] == pytest.approx(usa_average)
+
+
+def test_sql_region_aggregation_summary(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT
+            region,
+            COUNT(*),
+            SUM(sales),
+            AVG(sales),
+            MIN(sales),
+            MAX(sales)
+        FROM sales
+        GROUP BY region
+        ORDER BY region
+        """
+    ).fetchall()
+
+    assert result[0][0] == "India"
+    assert result[0][1] == 5
+    assert result[0][2] == 145000
+    assert result[0][3] == pytest.approx(29000)
+    assert result[0][4] == 10000
+    assert result[0][5] == 50000
+
+    assert result[1][0] == "USA"
+    assert result[1][1] == 2
+    assert result[1][2] == 60000
+    assert result[1][3] == pytest.approx(30000)
+    assert result[1][4] == 20000
+    assert result[1][5] == 40000
+
+
+def test_sql_revenue_by_region_and_product(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT region, product, SUM(sales)
+        FROM sales
+        GROUP BY region, product
+        ORDER BY region, product
+        """
+    ).fetchall()
+
+    assert result == [
+        ("India", "Keyboard", 10000),
+        ("India", "Laptop", 50000),
+        ("India", "Monitor", 40000),
+        ("India", "Mouse", 15000),
+        ("India", "Phone", 30000),
+        ("USA", "Laptop", 40000),
+        ("USA", "Phone", 20000),
+    ]
+
+
+def test_sql_product_revenue_for_india(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT product, SUM(sales)
+        FROM sales
+        WHERE region = ?
+        GROUP BY product
+        ORDER BY product
+        """,
+        ("India",)
+    ).fetchall()
+
+    assert result == [
+        ("Keyboard", 10000),
+        ("Laptop", 50000),
+        ("Monitor", 40000),
+        ("Mouse", 15000),
+        ("Phone", 30000),
+    ]
+
+
+
+
+def test_revenue_by_region_visualization_data(populated_db):
+    rows = populated_db.execute(
+        """
+        SELECT region, SUM(sales)
+        FROM sales
+        GROUP BY region
+        ORDER BY region
+        """
+    ).fetchall()
+
+    result = {
+        row[0]: row[1]
+        for row in rows
+    }
+
+    assert result["India"] == 145000
+    assert result["USA"] == 60000
+
+
+
+
+def test_region_chart_data_contract(client):
+    """Test that revenue by region returns proper contract for charting"""
+    response = client.get("/analytics/revenue-by-region")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    # Verify structure
+    assert "metric" in data
+    assert "data" in data
+
+    # Verify it's a list of regions
+    assert isinstance(data["data"], list)
+
+    # Check each region entry
+    for item in data["data"]:
+        assert "region" in item
+        assert "revenue" in item
+        assert isinstance(item["revenue"], (int, float))
+
+
+def test_revenue_by_region_sql_expected(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT region, SUM(sales) AS revenue
+        FROM sales
+        GROUP BY region
+        ORDER BY region
+        """
+    ).fetchall()
+
+    expected = [
+        ("India", 145000),
+        ("USA", 60000),
+    ]
+
+    assert result == expected
+
