@@ -11,6 +11,9 @@ from tests.helpers.sql_validation import get_expected_revenue
 
 import pytest
 
+pytestmark = pytest.mark.repository
+
+
 
 def test_india_laptop_revenue():
     actual = get_revenue_with_filters(

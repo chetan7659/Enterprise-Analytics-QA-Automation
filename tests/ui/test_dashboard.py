@@ -1,6 +1,9 @@
 import pytest
 from playwright.sync_api import Page, expect
 
+pytestmark = pytest.mark.ui
+
+
 BASE_URL = "http://127.0.0.1:8000/dashboard/"
 
 def test_dashboard_loads(page: Page):

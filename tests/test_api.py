@@ -1,6 +1,10 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+
+pytestmark = pytest.mark.api
+
 
 
 client = TestClient(app)
@@ -179,4 +183,4 @@ def test_step46_kpi_reset(client):
 
     assert kpi_total > kpi_india
     assert kpi_total > kpi_usa
-    assert kpi_total >= (kpi_india + kpi_usa)
+    assert kpi_total >= (kpi_india + kpi_usa)

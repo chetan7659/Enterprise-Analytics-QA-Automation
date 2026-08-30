@@ -1,6 +1,9 @@
 import pytest
 from playwright.sync_api import Page, expect
 
+pytestmark = pytest.mark.e2e
+
+
 BASE_URL = "http://127.0.0.1:8000/dashboard/"
 
 def get_expected_revenue(db_connection, region=None):

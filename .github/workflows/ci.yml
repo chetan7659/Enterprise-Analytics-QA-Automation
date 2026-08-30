@@ -31,3 +31,10 @@ jobs:
 
       - name: Run Pytest Backend and E2E Suite
         run: pytest -v
+
+      - name: Upload Test Report Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-html-report
+          path: docs/reports/test-report.html
