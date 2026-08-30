@@ -76,7 +76,7 @@ async function fetchRevenueByRegion(region = "") {
             params.set("region", region);
         }
 
-        const baseUrl = 'http://localhost:8000/analytics/revenue-by-region';
+        const baseUrl = '/analytics/revenue-by-region';
         const url = region ? `${baseUrl}?${params.toString()}` : baseUrl;
 
         console.log(`🔍 Fetching: ${url}`);
@@ -95,7 +95,7 @@ async function fetchRevenueByRegion(region = "") {
 
     } catch (error) {
         console.error('❌ Error fetching from API:', error);
-        errorEl.textContent = `Error: ${error.message}. Make sure the backend is running on http://localhost:8000`;
+        errorEl.textContent = `Error: ${error.message}. Make sure the backend is running.`;
         errorEl.classList.add('active');
         loadingEl.classList.remove('active');
         return null;
@@ -408,7 +408,7 @@ async function updateKPI() {
         if (selectedRegion) {
             params.set("region", selectedRegion);
         }
-        const baseUrl = 'http://localhost:8000/analytics/revenue';
+        const baseUrl = '/analytics/revenue';
         const url = selectedRegion ? `${baseUrl}?${params.toString()}` : baseUrl;
 
         const response = await fetch(url);
