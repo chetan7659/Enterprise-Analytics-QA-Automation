@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.database import get_connection
 from app.repositories.sales_repository import (
     get_all_sales,
@@ -8,6 +9,7 @@ from app.repositories.sales_repository import (
     get_revenue_by_product as fetch_revenue_by_product,
     get_revenue_by_product_for_region,
     get_revenue_by_product_for_region_and_product,
+    get_revenue_with_filters,
 )
 app = FastAPI(title="Enterprise Analytics QA Platform")
 
@@ -39,19 +41,13 @@ def get_sales():
     }
 
 @app.get("/analytics/revenue")
-def get_revenue():
-    connection = get_connection()
+def get_revenue(region: str | None = None):
+    revenue = get_revenue_with_filters(region=region)
 
-    try:
-        revenue = get_total_revenue(connection)
-
-        return {
-            "metric": "total_revenue",
-            "value": revenue
-        }
-
-    finally:
-        connection.close()
+    return {
+        "metric": "total_revenue",
+        "value": revenue
+    }
 
 @app.get("/analytics/revenue-by-region")
 def get_revenue_by_region(region: str | None = None):
@@ -98,3 +94,5 @@ def get_revenue_by_product(
         },
         "data": data
     }
+
+app.mount("/dashboard", StaticFiles(directory="frontend", html=True), name="frontend")

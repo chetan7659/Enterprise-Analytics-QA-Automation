@@ -215,6 +215,42 @@
         .no-data-message.active {
             display: block;
         }
+        /* ---- Step 46: Dashboard Integration (KPI Card) ---- */
+        .kpi-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px 24px;
+            min-width: 200px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .kpi-title {
+            font-size: 13px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
         /* -------------------------------- */
 
         .footer {
@@ -232,7 +268,7 @@
     <div class="container">
         <header>
             <h1>Enterprise Analytics QA Platform</h1>
-            <p class="subtitle">Step 45: ECharts Tooltip, Legend & Axis Validation</p>
+            <p class="subtitle">Step 46: Dashboard Integration</p>
         </header>
 
         <div class="error" id="error-message"></div>
@@ -249,6 +285,14 @@
                     <option value="USA">USA</option>
                 </select>
                 <span class="filter-active-badge" id="filter-badge">Filtered</span>
+            </div>
+
+            <!-- Step 46: KPI Dashboard Integration -->
+            <div class="kpi-container">
+                <div class="kpi-card">
+                    <div class="kpi-title">Total Revenue</div>
+                    <div class="kpi-value" id="kpi-revenue">...</div>
+                </div>
             </div>
 
             <div class="controls">

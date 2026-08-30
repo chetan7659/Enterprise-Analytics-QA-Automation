@@ -41,6 +41,7 @@ function initChart() {
     // Initialize ECharts instance with dark theme
     const chart = echarts.init(chartElement, 'dark');
     console.log('✅ ECharts initialized with dark theme');
+    window.revenueChart = chart; // Expose to Playwright for E2E testing
 
     return chart;
 }
@@ -392,6 +393,35 @@ function handleRegionFilter(e) {
 
     // Re-render with the current chart type (filter state preserved)
     updateChart(currentChartType);
+    
+    // Step 46: Sync KPI
+    updateKPI();
+}
+
+// ============================================================================
+// STEP 46: KPI Dashboard Integration
+// ============================================================================
+
+async function updateKPI() {
+    try {
+        const params = new URLSearchParams();
+        if (selectedRegion) {
+            params.set("region", selectedRegion);
+        }
+        const baseUrl = 'http://localhost:8000/analytics/revenue';
+        const url = selectedRegion ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`KPI API returned status ${response.status}`);
+        
+        const data = await response.json();
+        
+        const formattedValue = new Intl.NumberFormat('en-US').format(data.value || 0);
+        document.getElementById('kpi-revenue').textContent = `$${formattedValue}`;
+    } catch (error) {
+        console.error('❌ Error fetching KPI:', error);
+        document.getElementById('kpi-revenue').textContent = 'Error';
+    }
 }
 
 // ============================================================================
@@ -424,6 +454,7 @@ function initApp() {
 
     // Initial render (All Regions, Bar chart)
     updateChart('bar');
+    updateKPI();
 
     // Handle window resize
     window.addEventListener('resize', () => {
