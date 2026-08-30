@@ -177,6 +177,29 @@ def get_revenue_by_product_for_region(region):
     return revenue_by_product
 
 
+def get_revenue_by_product_and_region(connection=None, product=None, region=None):
+    should_close = connection is None
+    if connection is None:
+        connection = get_connection()
+
+    cursor = connection.execute(
+        """
+        SELECT SUM(sales)
+        FROM sales
+        WHERE product = ?
+        AND region = ?
+        """,
+        (product, region)
+    )
+
+    row = cursor.fetchone()
+
+    if should_close:
+        connection.close()
+
+    return row[0] if row and row[0] is not None else None
+
+
 def get_revenue_by_product_for_region_and_product(region, product):
     connection = get_connection()
 

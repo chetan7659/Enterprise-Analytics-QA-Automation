@@ -1,9 +1,10 @@
 from app.repositories.sales_repository import (
     get_revenue_by_date_range,
+    get_revenue_by_product,
+    get_revenue_by_product_and_region,
     get_revenue_by_region,
     get_revenue_with_filters,
     get_total_revenue,
-    get_revenue_by_product,
 )
 
 from tests.helpers.sql_validation import get_expected_revenue
@@ -482,3 +483,134 @@ def test_product_revenue_matches_sql(
     )
 
     assert actual_revenue == expected_revenue    
+
+
+
+
+
+
+
+
+def test_sql_product_revenue(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT SUM(sales)
+        FROM sales
+        WHERE product = ?
+        """,
+        ("Laptop",)
+    ).fetchone()
+
+    assert result[0] == 90000
+
+
+
+
+
+
+@pytest.mark.parametrize(
+    "product",
+    [
+        "Laptop",
+        "Phone",
+        "Keyboard",
+        "Mouse",
+        "Monitor",
+    ]
+)
+def test_product_revenue_matches_sql(
+    populated_db,
+    product
+):
+    sql_result = populated_db.execute(
+        """
+        SELECT SUM(sales)
+        FROM sales
+        WHERE product = ?
+        """,
+        (product,)
+    ).fetchone()
+
+    expected_revenue = sql_result[0]
+
+    actual_revenue = get_revenue_by_product(
+        populated_db,
+        product
+    )
+
+    assert actual_revenue == expected_revenue
+
+
+
+def test_sql_product_and_region_revenue(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT SUM(sales)
+        FROM sales
+        WHERE product = ?
+        AND region = ?
+        """,
+        ("Laptop", "India")
+    ).fetchone()
+
+    assert result[0] == 50000    
+
+
+@pytest.mark.parametrize(
+    "product, region",
+    [
+        ("Laptop", "India"),
+        ("Laptop", "USA"),
+        ("Phone", "India"),
+        ("Phone", "USA"),
+    ]
+)
+def test_product_region_revenue_matches_sql(
+    populated_db,
+    product,
+    region
+):
+    sql_result = populated_db.execute(
+        """
+        SELECT SUM(sales)
+        FROM sales
+        WHERE product = ?
+        AND region = ?
+        """,
+        (product, region)
+    ).fetchone()
+
+    expected_revenue = sql_result[0]
+
+    actual_revenue = get_revenue_by_product_and_region(
+        populated_db,
+        product,
+        region
+    )
+
+    assert actual_revenue == expected_revenue
+
+
+
+
+
+
+def test_sql_product_region_date_revenue(populated_db):
+    result = populated_db.execute(
+        """
+        SELECT SUM(sales)
+        FROM sales
+        WHERE product = ?
+        AND region = ?
+        AND sale_date BETWEEN ? AND ?
+        """,
+        (
+            "Laptop",
+            "India",
+            "2026-01-01",
+            "2026-01-31"
+        )
+    ).fetchone()
+
+    assert result[0] == 50000
+
