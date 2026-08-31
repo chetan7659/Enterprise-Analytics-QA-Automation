@@ -823,6 +823,7 @@ def test_sql_product_revenue_for_india(populated_db):
 
 
 
+@pytest.mark.visualization
 def test_revenue_by_region_visualization_data(populated_db):
     rows = populated_db.execute(
         """
@@ -844,6 +845,7 @@ def test_revenue_by_region_visualization_data(populated_db):
 
 
 
+@pytest.mark.visualization
 def test_region_chart_data_contract(client):
     """Test that revenue by region returns proper contract for charting"""
     response = client.get("/analytics/revenue-by-region")

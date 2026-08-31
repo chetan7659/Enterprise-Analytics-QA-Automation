@@ -110,6 +110,7 @@ def test_revenue_by_product_for_region_and_product():
 # STEP 45: ECHARTS TOOLTIP, LEGEND & AXIS VALIDATION
 # ============================================================================
 
+@pytest.mark.visualization
 def test_step45_simulate_tooltip_data_india(client):
     response = client.get("/analytics/revenue-by-region", params={"region": "India"})
     api_data = response.json()["data"]
@@ -118,6 +119,7 @@ def test_step45_simulate_tooltip_data_india(client):
     assert tooltip_data[0]["name"] == "India"
     assert tooltip_data[0]["value"] > 0
 
+@pytest.mark.visualization
 def test_step45_simulate_tooltip_data_usa(client):
     response = client.get("/analytics/revenue-by-region", params={"region": "USA"})
     api_data = response.json()["data"]
@@ -126,6 +128,7 @@ def test_step45_simulate_tooltip_data_usa(client):
     assert tooltip_data[0]["name"] == "USA"
     assert tooltip_data[0]["value"] > 0
 
+@pytest.mark.visualization
 def test_step45_simulate_tooltip_after_filter(client):
     response = client.get("/analytics/revenue-by-region", params={"region": "India"})
     api_data = response.json()["data"]
@@ -133,6 +136,7 @@ def test_step45_simulate_tooltip_after_filter(client):
     assert "India" in names_in_data
     assert "USA" not in names_in_data
 
+@pytest.mark.visualization
 def test_step45_validate_legend_and_series_name(client):
     response = client.get("/analytics/revenue-by-region")
     data = response.json()
@@ -145,6 +149,7 @@ def test_step45_validate_legend_and_series_name(client):
 # STEP 46: DASHBOARD INTEGRATION
 # ============================================================================
 
+@pytest.mark.visualization
 def test_step46_kpi_syncs_with_filter(client):
     # Fetch KPI for India
     kpi_res = client.get("/analytics/revenue", params={"region": "India"})
@@ -156,6 +161,7 @@ def test_step46_kpi_syncs_with_filter(client):
 
     assert kpi_val == chart_val
 
+@pytest.mark.visualization
 def test_step46_dashboard_state_consistency(client, db_connection):
     # SQL oracle for India
     cursor = db_connection.execute("SELECT SUM(sales) FROM sales WHERE region = 'India'")
@@ -172,6 +178,7 @@ def test_step46_dashboard_state_consistency(client, db_connection):
     # Assert Dashboard Consistency
     assert sql_val == api_kpi_val == api_chart_val
 
+@pytest.mark.visualization
 def test_step46_kpi_reset(client):
     # KPI without filter (reset)
     kpi_res = client.get("/analytics/revenue")
